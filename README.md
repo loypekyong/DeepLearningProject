@@ -7,6 +7,8 @@ libraries required:
 - torch
 - sklearn
 
+Our LSTM model has the best performance on the test set.
+
 Training model files (just run all to get the model files):
 - rnn.ipynb
 - lstm.ipynb
