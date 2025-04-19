@@ -18,5 +18,5 @@ Model Weights after training
 
 
 Best Model weights checkpoint
-- model_cp/rnn_model-100.pth
-- model_cp/lstm_model-100.pth
+- models_cp/rnn_model-100.pth
+- models_cp/lstm_model-100.pth
