@@ -12,4 +12,11 @@ Training model files (just run all to get the model files):
 - lstm.ipynb
 -
 
+Model Weights after training
+- rnn_model.pth
+- lstm_model.pth
 
+
+Best Model weights checkpoint
+- model_cp/rnn_model_100.pth
+- model_cp/lstm_model_100.pth
