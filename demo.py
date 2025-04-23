@@ -18,6 +18,7 @@ data = st.file_uploader("Upload data", type=["csv", "xlsx"])
 model_names = {
     'Model 1: LSTM': 'lstm_model.pth',
     'Model 2: RNN': 'rnn_model.pth',
+    'Model 3: Transformer Encoder': 'transformer_encoder_model.pth',
 }
 
 model_option = st.selectbox('Choose the model for prediction:', options=list(model_names.keys()))
@@ -73,7 +74,44 @@ class RNNModel(nn.Module):
     
     def init_hidden(self, batch_size):
         return torch.zeros(self.num_layers, batch_size, self.hidden_size)
-    
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, max_len=5000):
+        super().__init__()
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        return x + self.pe[:, :x.size(1), :]
+
+class RainfallTransformer(nn.Module):
+    def __init__(self, input_dim, d_model=128, nhead=8, num_layers=2, dim_feedforward=128, dropout=0.1, seq_length=12):
+        super(RainfallTransformer, self).__init__()
+        self.input_norm = nn.LayerNorm(input_dim)
+        self.input_linear = nn.Linear(input_dim, d_model)
+        self.pos_encoder = PositionalEncoding(d_model, max_len=seq_length)
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model, nhead=nhead, dim_feedforward=dim_feedforward, dropout=dropout, batch_first=True
+        )
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        self.output_linear = nn.Linear(d_model, 1)
+        self.dropout = nn.Dropout(dropout)
+        self.d_model = d_model
+
+    def forward(self, x):
+        x = self.input_norm(x)
+        x = self.input_linear(x) * torch.sqrt(torch.tensor(self.d_model, dtype=torch.float32))
+        x = self.pos_encoder(x)
+        x = self.dropout(x)
+        x = self.transformer_encoder(x)
+        x = self.output_linear(x[:, -1, :])
+        return x.squeeze()
+
 
 # Function to create sequences
 def create_sequences(X, y, seq_length):
@@ -119,6 +157,8 @@ if data is not None:
         model = LSTMRainfallModel(input_dim)
     elif model_filename == 'rnn_model.pth':
         model = RNNModel(input_dim)
+    elif model_filename == 'transformer_encoder_model.pth':
+        model = RainfallTransformer(input_dim)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.load_state_dict(model_selected)
