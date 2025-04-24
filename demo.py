@@ -136,19 +136,34 @@ if data is not None:
     else:
       df=pd.read_csv(data)
 
+    # compute min, max and range of the total_rainfall column, for un-normalizing the predictions
     rainfall_min = df['total_rainfall'].min()
     rainfall_max = df['total_rainfall'].max()
     rainfall_range = rainfall_max - rainfall_min
     epsilon = 1e-10
+
+    # continue preprocessing the data
     df_normalized = normalised(df, min_max=True)
     df_normalized['month'] = pd.to_datetime(df_normalized['month'], format='%Y-%m').dt.to_period('M')
+
     df_normalized.set_index('month', inplace=True)
+
+    # Get list of unique months (excluding the first twelve)
+    unique_months = df_normalized.index.unique()
+    valid_months = unique_months[12:]  # Exclude the first 12 months
+
+    # Create a selection box for the months
+    month_option = st.selectbox('Month to predict:', options=valid_months)
+
+    # Calculate the start and end of the previous 12 months
+    selected_period = pd.Period(month_option)
+    start_period = selected_period - 12  # 12 months back
+    end_period = selected_period - 1  # End of the selected month
 
     X = df_normalized.values
     y = df_normalized['total_rainfall'].values  
 
     SEQ_LENGTH = 12
-
     X_seq, y_seq = create_sequences(X, y, 12)
 
     input_dim = X.shape[1]                                                                                                                   
@@ -193,7 +208,7 @@ if data is not None:
     #   # Predict the next month
     #   prediction = model(X_input).cpu().numpy()
 
-        input_seq = df_normalized.loc['2021-01':'2021-12'].values  # shape: (12, input_dim)
+        input_seq = df_normalized.loc[start_period:end_period].values  # shape: (12, input_dim)
 
         X_input = torch.tensor(input_seq, dtype=torch.float32).unsqueeze(0).to(device)
 
@@ -202,10 +217,10 @@ if data is not None:
 
 
         st.subheader("Forecasted Rainfall")
-        st.write(f"Predicted rainfall for January 2022: {(prediction*(rainfall_range+epsilon))+rainfall_min-epsilon:.2f} mm")
+        st.write(f"Predicted rainfall for {month_option}: {(prediction*(rainfall_range+epsilon))+rainfall_min-epsilon:.2f} mm")
 
-        actual_value = df_normalized.loc['2022-01', 'total_rainfall']
-        st.write(f"Actual rainfall for January 2022: {(actual_value*(rainfall_range+epsilon))+rainfall_min-epsilon:.2f} mm")
+        actual_value = df_normalized.loc[month_option, 'total_rainfall']
+        st.write(f"Actual rainfall for {month_option}: {(actual_value*(rainfall_range+epsilon))+rainfall_min-epsilon:.2f} mm")
         
 
 
