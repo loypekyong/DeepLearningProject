@@ -16,8 +16,8 @@ data = st.file_uploader("Upload data", type=["csv", "xlsx"])
 
 # Let the user select the model
 model_names = {
-    'Model 1: LSTM': 'lstm_model.pth',
-    'Model 2: RNN': 'rnn_model.pth',
+    'Model 1: LSTM': './models_cp/lstm_model-100.pth',
+    'Model 2: RNN': './models_cp/rnn_model-100.pth',
     'Model 3: Transformer Encoder': 'transformer_encoder_model.pth',
 }
 
@@ -172,9 +172,9 @@ if data is not None:
     model_filename = model_names[model_option]                                          
     model_selected = load_model_wrapper(model_filename)
 
-    if model_filename == 'lstm_model.pth':
+    if model_filename == './models_cp/lstm_model-100.pth':
         model = LSTMRainfallModel(input_dim)
-    elif model_filename == 'rnn_model.pth':
+    elif model_filename == './models_cp/rnn_model-100.pth':
         model = RNNModel(input_dim)
     elif model_filename == 'transformer_encoder_model.pth':
         model = RainfallTransformer(input_dim)

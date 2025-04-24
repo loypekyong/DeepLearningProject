@@ -6,6 +6,7 @@ libraries required:
 - pandas
 - torch
 - sklearn
+- streamlit
 
 Our LSTM model has the best performance on the test set.
 
@@ -27,3 +28,6 @@ Best Model weights checkpoint
 - models_cp/lstm_model-100.pth
 (No checkpoints for transformer encoder, only best weights saved
 to transformer_encoder_model.pth)
+
+How to run the demo file:
+``streamlit run demo.py``
