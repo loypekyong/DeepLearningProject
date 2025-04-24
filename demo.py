@@ -9,7 +9,7 @@ import torch.nn as nn
 from sklearn.model_selection import train_test_split
 import math
 
-st.title("Alzheimer's Detection App")
+st.title("Weather Prediction App")
 
 # Upload image and show
 data = st.file_uploader("Upload data", type=["csv", "xlsx"])
@@ -180,21 +180,28 @@ if data is not None:
       # st.subheader("Predicted Rainfall")
       # for i, value in enumerate(predicted_rainfall):
       #     st.write(f"{months[i]}: {value:.2f} mm")
-
-      device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
       # Use the last 12 months as input
-      last_seq = df_normalized[-SEQ_LENGTH:].values  # shape: (12, num_features)
-      X_input = torch.tensor(last_seq, dtype=torch.float32).unsqueeze(0).to(device)
+    #   last_seq = df_normalized[-SEQ_LENGTH:].values  # shape: (12, num_features)
+    #   X_input = torch.tensor(last_seq, dtype=torch.float32).unsqueeze(0).to(device)
 
-      # Predict the next month
-      prediction = model(X_input).cpu().numpy()
+    #   # Predict the next month
+    #   prediction = model(X_input).cpu().numpy()
 
-      # Optionally inverse-transform if you used MinMaxScaler for rainfall
-      # prediction = scaler_y.inverse_transform([[prediction]])[0][0]
+        input_seq = df_normalized.loc['2021-01':'2021-12'].values  # shape: (12, input_dim)
 
-      st.subheader("Forecasted Rainfall")
-      st.write(f"March 2025: {prediction:.2f} mm")
+        X_input = torch.tensor(input_seq, dtype=torch.float32).unsqueeze(0).to(device)
+
+        prediction = model(X_input).cpu().numpy()
+
+
+
+        st.subheader("Forecasted Rainfall")
+        st.write(f"Predicted rainfall for January 2022: {prediction:.2f} mm")
+
+        actual_value = df_normalized.loc['2022-01', 'total_rainfall']
+        st.write(f"Actual rainfall for January 2022: {actual_value:.2f} mm")
         
 
 
