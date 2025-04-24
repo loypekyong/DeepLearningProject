@@ -198,10 +198,10 @@ if data is not None:
 
 
         st.subheader("Forecasted Rainfall")
-        st.write(f"Predicted rainfall for January 2022: {prediction:.2f} mm")
+        st.write(f"Predicted rainfall for January 2022: {prediction:.2f}")
 
         actual_value = df_normalized.loc['2022-01', 'total_rainfall']
-        st.write(f"Actual rainfall for January 2022: {actual_value:.2f} mm")
+        st.write(f"Actual rainfall for January 2022: {actual_value:.2f}")
         
 
 
