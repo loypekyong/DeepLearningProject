@@ -136,6 +136,10 @@ if data is not None:
     else:
       df=pd.read_csv(data)
 
+    rainfall_min = df['total_rainfall'].min()
+    rainfall_max = df['total_rainfall'].max()
+    rainfall_range = rainfall_max - rainfall_min
+    epsilon = 1e-10
     df_normalized = normalised(df, min_max=True)
     df_normalized['month'] = pd.to_datetime(df_normalized['month'], format='%Y-%m').dt.to_period('M')
     df_normalized.set_index('month', inplace=True)
@@ -198,10 +202,10 @@ if data is not None:
 
 
         st.subheader("Forecasted Rainfall")
-        st.write(f"Predicted rainfall for January 2022: {prediction:.2f}")
+        st.write(f"Predicted rainfall for January 2022: {(prediction*(rainfall_range+epsilon))+rainfall_min-epsilon:.2f} mm")
 
         actual_value = df_normalized.loc['2022-01', 'total_rainfall']
-        st.write(f"Actual rainfall for January 2022: {actual_value:.2f}")
+        st.write(f"Actual rainfall for January 2022: {(actual_value*(rainfall_range+epsilon))+rainfall_min-epsilon:.2f} mm")
         
 
 
